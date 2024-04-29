@@ -1,0 +1,82 @@
+
+.login-container {
+    height: 100vh;
+    width: 100%;
+    display: flex;
+    background-color: #1A1A2E;
+    color: #E5E5E5;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.login-container .librarian-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    width: 50%;
+    background-color: #1A1A2E;
+}
+
+.login-container .librarian-container img {
+    width: auto;
+    height: 100vh;
+    background-color: #1A1A2E;
+}
+
+.login-form-container{
+    width: 45%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+
+}
+.login-form-container h2{
+    font-size: 2.5rem;
+
+}
+.login-form {
+    display: flex;
+    flex-direction: column;
+    width: 60%;
+}
+
+.login-form input {
+    margin: 0.5rem 0;
+    padding: 0.8rem;
+    border-radius: 5px;
+    border: 1px solid #333;
+    background-color: #222;
+    color: #fff;
+    font-size: 1.6rem;
+}
+
+.login-form button {
+    background-color: #4ECCA3;
+    color: #FFF;
+    padding: 0.8rem;
+    font-size: 1.6rem;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-top: 1rem;
+}
+
+.login-form button:hover {
+    background-color: #45B097;
+}
+.alternate-action {
+    margin-top: 2rem;
+    font-size: 1.4rem;
+    text-align: center;
+}
+
+.alternate-action a {
+    color: #4ECCA3;
+    text-decoration: none;
+}
+
+.alternate-action a:hover {
+    text-decoration: underline;
+}
