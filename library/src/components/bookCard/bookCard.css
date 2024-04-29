@@ -61,7 +61,7 @@
 
 .inc-dec {
   position: absolute;
-  bottom: 10px;
+  bottom: 28px;
   right: 10px;
   display: flex;
   flex-direction: column;
@@ -73,12 +73,13 @@
   height: 30px;
   border-radius: 50%;
   border: none;
-  background-color: #333;
+  background-color: #333333;
   color: white;
   font-size: 20px;
   font-weight: bold;
   cursor: pointer;
   margin: 5px 0;
+  opacity: 0.8;
 }
 
 .inc-dec button:hover {
