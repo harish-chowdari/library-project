@@ -4,6 +4,8 @@ const cron = require("node-cron");
 
 const mongoose = require("mongoose");
 
+
+
 const EmailsSentSchema = require("../models/NodeMailerModel")
 const Reserved = require("../models/HistoryModel");
 const moment = require("moment"); // For date comparison
@@ -11,90 +13,98 @@ const axios = require("axios");
 dotenv.config();
 
 
+
+
 async function getAllReserved(req, res) {
   try {
       const allReserved = await Reserved.find().populate("items.bookId").populate("userId", "-password");
 
       if (!allReserved) {
-          return res.status(200).json({ noReservedFound: "Reserved not found" });
+          return { noReservedFound: "Reserved not found" }
       }
 
-      return res.json({ allReserved });
-  } catch (error) {
+      return allReserved;
+  } 
+  
+  catch (error) {
       console.error(error);
-      res.status(500).json({ message: error.message });
   }
 }
 
 
 
-const checkReserved = async (req, res) => {
-  try { 
-    // Get the current date in UTC for date comparison
-    const currentDate = moment.utc().format("YYYY-MM-DD");
 
+const checkReserved = async () => { // This function doesn't need `req` or `res`
+  try {
+    const currentDate = moment.utc().format("YYYY-MM-DD");
+    
     // Fetch all reserved books
-    
-    
-    const response = await axios.get("http://localhost:3002/reserved/all-reserved-books");
-    
-    
-    if (!response.data || !response.data.allReserved) {
-      return res.status(500).json({ error: "Unexpected response from the server." });
+    const allReserve = await getAllReserved();
+
+    if (!Array.isArray(allReserve) || allReserve.length === 0) {
+      return { message: "No reserved books found" }; // Return a plain object
     }
 
-    // Get the list of all reservations
-    const reservedData = response.data.allReserved;
+    const matchingReservations = allReserve.map((reservation) => {
+      const matchingItems = reservation.items.filter(
+        (item) => moment.utc(item.willUseBy).format("YYYY-MM-DD") === currentDate
+      );
 
-    // Find reservations where at least one item has a "willUseBy" date matching the current date
-    const matchingReservations = reservedData
-      .map((reservation) => {
-        const matchingItems = reservation.items.filter(
-          (item) =>
-            moment.utc(item.willUseBy).format("YYYY-MM-DD") === currentDate
-        );
-
-        return {
-          userId: reservation.userId._id,
-          userName: reservation.userId.name,
-          userEmail: reservation.userId.email,
-          matchingItems,
-        };
-      })
-      .filter((res) => res.matchingItems.length > 0);
+      return {
+        userId: reservation.userId._id,
+        userName: reservation.userId.name,
+        userEmail: reservation.userId.email,
+        matchingItems,
+      };
+    }).filter((res) => res.matchingItems.length > 0);
 
     if (matchingReservations.length > 0) {
-      return res.status(200).json({
-        message: "Reservations found for today.",
+      return {
+        message: "Reservations found for today",
         reservations: matchingReservations,
-      });
-    } else {
-      return res.status(200).json({ message: "No reservations found for today." });
+      };
+    } 
+    
+   
+
+    else {
+      return { NoReservations: "No reservations found for today" }; // Handle no reservations case
     }
   } catch (error) {
     console.error("Error while checking reservations:", error);
-    return res.status(500).json({ error: "An error occurred while checking reservations." });
+    throw error; // Ensure errors propagate properly
   }
 };
+
+
+
+
+
 
 
 
 const sendEmail = async (req, res) => {
   try {
     // Fetch the reservations for today from the check-reservation endpoint
-    const response = await axios.get("http://localhost:3002/nodemailer/check-reservation");
+    const reservationsResponse = await checkReserved();
 
-    if (response.status !== 200 ) {
-      return res.status(500).json({ error: "Failed to retrieve reservations." });
-    }
 
-    const reservations = response.data.reservations;
 
-    if (!response.data.reservations || reservations.length === 0) {
+    const reservations = reservationsResponse.reservations;
+
+    if (!reservations || reservations.length === 0) {
       
-      return res.status(200).json({ noReservations: "No reservations found for today." });
+      return { noReservations: "No reservations found for today." }
       
     }
+
+
+    if (!reservationsResponse || !reservationsResponse.reservations ) {
+      
+      return { error: "Failed to retrieve reservations." }
+    }
+
+    
 
     const config = {
       service: "gmail",
@@ -214,7 +224,7 @@ const sendEmail = async (req, res) => {
       }
     }
 
-    return res.status(200).json({ message: "Emails sent successfully." });
+    return { message: "Emails sent successfully." }
   } catch (error) {
     console.error("Error sending emails:", error);
     return res.status(500).json({ error: "An error occurred while sending emails." });
@@ -227,11 +237,11 @@ const sendEmail = async (req, res) => {
 cron.schedule("10 * * * * *", async () => {
   try {
 
-    const res = await axios.post("http://localhost:3002/nodemailer/send-email")
+    const res = await sendEmail()
 
-    if(res.data.noReservations)
+    if(res)
     {
-      console.log(res.data.noReservations)
+      console.log(res)
       return
     } 
 

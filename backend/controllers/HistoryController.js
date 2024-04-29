@@ -121,45 +121,74 @@ async function getAllReserved(req, res) {
 
 
 
-async function fetchAllReserved() {
-    const allReserved = await Reserved.find();
-    if (!allReserved) {
-        throw new Error("No reserved data found");
-    }
-    return allReserved;
-}
 
-// Endpoint function to get all reserved data
-async function getAllReservedToGroupBookId(req, res) {
+async function getAllReservedToGroupBookId(req,res) {
     try {
-        const allReserved = await fetchAllReserved();
-        res.json({ allReserved });
+      const allReserved = await Reserved.find(); // Retrieve all reserved items from the database
+  
+      if (!Array.isArray(allReserved)) {
+        throw new Error("Expected an array of reserved books"); // Ensure the result is an array
+      }
+  
+      return { allReserved }; // Return as a JSON object
     } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: error.message });
+      console.error("Error in getAllReservedToGroupBookId:", error);
+      throw new Error("Failed to fetch reserved books");
     }
-}
+  }
+  
 
- 
+  
 
-async function getBookIdGroup(req, res) {
+
+  async function getBookIdGroup(req, res) {
     try {
-        const { bookId } = req.params;
-        const response = await axios.get("http://localhost:3002/reserved/all-reserved-books-by-book-id");
-        const allReserved = response.data.allReserved;
-
-        // Filter the allReserved array to include only documents that have items with the given bookId
-        const result = allReserved.map(reserved => {
-            const items = reserved.items.filter(item => item.bookId === bookId);
-            return { ...reserved, items };
-        }).filter(reserved => reserved.items.length > 0);
-
-        res.json({ result });
+      const { bookId } = req.params;
+  
+      if (!bookId) {
+        return res.status(400).json({ error: "bookId is required" });
+      }
+  
+      const allReserved = await Reserved.find();
+  
+      // Make sure bookId is a string for consistent comparison
+      const bookIdStr = bookId.toString();
+  
+      // Filter reserved entries to keep only those with items containing the specified bookId
+      const filteredReserved = allReserved
+        .map((reserved) => {
+          // Keep only the items that match the bookId
+          const matchingItems = reserved.items.filter(
+            (item) => item.bookId.toString() === bookIdStr
+          );
+  
+          // Return the reserved object with only matching items
+          return {
+            ...reserved.toObject(), // Convert to plain JavaScript object
+            items: matchingItems,
+          };
+        })
+        .filter((reserved) => reserved.items.length > 0); // Remove empty entries
+  
+      if (filteredReserved.length === 0) {
+        return { message: "No reserved books found for the specified bookId." };
+      } 
+  
+      return { result: filteredReserved };
     } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: error.message });
+      console.error("Error in getBookIdGroup:", error);
+      return { error: "An error occurred while fetching book group data." };
     }
-}
+  }
+  
+  
+  
+  
+
+  
+
+
+
 
 
 
@@ -167,10 +196,12 @@ async function getNearestWillUseBy(req, res) {
     const { bookId } = req.params;
 
     try {
-        const currentDate = new Date(); 
+        const currentDate = new Date(); // Current date
 
-        const { data } = await axios.get(`http://localhost:3002/reserved/book-id-group/${bookId}`);
-        const result = data.result;
+        const groupResponse = await getBookIdGroup({ params: { bookId } }, {});
+
+        const result = groupResponse.result;
+       
 
         if (!result || !Array.isArray(result) || result.length === 0) {
             return res.status(400).json({ message: "Invalid or empty result array" });
