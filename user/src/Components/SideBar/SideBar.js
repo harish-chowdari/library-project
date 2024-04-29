@@ -13,6 +13,8 @@ import { VscFeedback } from "react-icons/vsc";
 import { FiMail } from "react-icons/fi";
 
 
+
+
 const Sidebar = () => {
     const { userName } = useParams();
     const [cartItems, setCartItems] = useState([]);
@@ -105,9 +107,30 @@ const Sidebar = () => {
             <div className="nav-links">
 
             <h3>
-            <Typewriter />
+            <Typewriter
+                className="typewriter"
+                words={[
+                    'Expand your mind with a good book.',
+                    'Books are the keys to knowledge and wisdom.',
+                    'Explore new worlds through the pages of a book.',
+                    'Discover the power of imagination in every story.',
+                    'A book is a journey waiting to be taken.',
+                    'Get lost in a story and find yourself.',
+                    'Books can change lives, one page at a time.',
+                    'Find solace and inspiration in the pages of a book.',
+                    'Open a book and open your mind to endless possibilities.',
+                    'The best adventures begin with a book in hand.'
+                        ]}
+                loop={5000}
+                cursor
+                cursorStyle='_'
+                typeSpeed={70}
+                deleteSpeed={30}
+                delaySpeed={1000}
+                />
+
        
-      </h3> 
+            </h3> 
 
         <div className='user-div'>
                 <div className="logout" onClick={handleLogout}>

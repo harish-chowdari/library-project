@@ -20,7 +20,7 @@ async function getAllReserved(req, res) {
       const allReserved = await Reserved.find().populate("items.bookId").populate("userId", "-password");
 
       if (!allReserved) {
-          return { noReservedFound: "Reserved not found" }
+          return { noReservedFound: "Reserved not found" };
       }
 
       return allReserved;

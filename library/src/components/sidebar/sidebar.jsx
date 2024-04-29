@@ -90,8 +90,25 @@ const Sidebar = () => {
 
             <h3>
       
-        <Typewriter />
-      </h3>
+                    <Typewriter
+                className="typewriter"
+                words={[
+            'Libraries are portals to different worlds.',
+            'Libraries are the heartbeats of communities.',
+            'A library is a treasure trove of stories waiting to be explored.',
+            'Libraries empower minds and inspire imaginations.',      
+            'In a library, every book is a new adventure.',
+            "A librarian's passion is to connect readers with their next great read."
+            
+                ]}
+                loop={5000}
+                cursor
+                cursorStyle='_'
+                typeSpeed={70}
+                deleteSpeed={30}
+                delaySpeed={1000}
+                />
+            </h3>
 
 <div className='user-div'>
                 <div className="logout" onClick={handleLogout}>
